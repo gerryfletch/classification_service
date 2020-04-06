@@ -2,8 +2,8 @@ import torchvision.models as models
 import torch
 from torch import Tensor
 import torch.nn.functional as F
-from datasource import DataSource
-import imagenet
+from classification.datasource import DataSource
+from classification import imagenet
 
 
 class Classification:

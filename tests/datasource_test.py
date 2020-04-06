@@ -1,5 +1,5 @@
 import pytest
-from datasource import DataSource
+from classification.datasource import DataSource
 
 valid_image_url = "https://www.sciencemag.org/sites/default/files/styles/article_main_large/public/dogs_1280p_0.jpg"
 
