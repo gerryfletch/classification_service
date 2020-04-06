@@ -17,4 +17,5 @@ jobs:
       - run: conda --version
       - run: which python
       - name: Test
-        run: pytest
+        uses: fylein/python-pytest-github-action@v1
+        run: pytest -s
