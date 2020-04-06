@@ -1,5 +1,7 @@
 import torchvision.transforms as transforms
 import functools
+from classification import labels
+from typing import Dict
 
 # Normalize function for mean + standard deviation
 # used for all imagenet images.
@@ -18,10 +20,26 @@ image_edge_length = 256
 crop_size = 224
 
 
+class Label:
+    id: str
+    name: str
+    uri: str
+
+    def __init__(self, id: str, name: str, uri: str):
+        self.id = id
+        self.name = name
+        self.uri = uri
+
+
 @functools.lru_cache(maxsize=1, typed=False)
-def get_labels() -> [str]:
-    '''
-    Loads the ordered list of 1000 labels from imagenet_classes.txt
-    '''
-    with open('imagenet_classes.txt') as f:
-        return [line.strip().lower() for line in f.readlines()]
+def get_labels() -> [Label]:
+    result = []
+    for i in range(1000):
+        label_dic = labels.labels.get(i)
+        label = Label(
+            id=label_dic['id'],
+            name=label_dic['label'],
+            uri=label_dic['uri']
+        )
+        result.append(label)
+    return result

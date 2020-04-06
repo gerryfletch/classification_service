@@ -4,13 +4,14 @@ from torch import Tensor
 import torch.nn.functional as F
 from classification.datasource import DataSource
 from classification import imagenet
+from classification.imagenet import Label
 
 
 class Classification:
     accuracy: int
     label: str
 
-    def __init__(self, accuracy: int, label: int):
+    def __init__(self, accuracy: int, label: Label):
         self.accuracy = accuracy
         self.label = label
 
@@ -54,9 +55,9 @@ class Network():
         top_values, top_indexes = torch.topk(result, 5)
         top_result = []
         for i in range(5):
-            print(self.labels[top_indexes[i]])
+            top_value = top_values[i]
+            top_index = top_indexes[i].item()
+
             if (top_values[i] >= self.accuracy_boundary):
-                top_result.append(
-                    Classification(top_values[i], self.labels[top_indexes[i]])
-                )
+                top_result.append(Classification(top_value, self.labels[top_index]))
         return top_result
