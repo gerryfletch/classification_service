@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Initialize Conda Environment
+        uses: s-weigand/setup-conda@v1
+      - run: conda --version
+      - run: which python
+      - name: Test
+        run: pytest
