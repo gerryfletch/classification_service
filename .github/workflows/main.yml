@@ -21,4 +21,4 @@ jobs:
       - run: conda --version
       - run: which python
       - name: Test
-        run: pytest tests -s
+        run: python -m pytest -s
