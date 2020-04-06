@@ -3,7 +3,7 @@ import uuid
 import urllib.request
 from PIL import Image
 import torchvision.transforms as transforms
-import imagenet
+from classification import imagenet
 from torch.tensor import Tensor
 
 
