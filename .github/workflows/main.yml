@@ -18,4 +18,5 @@ jobs:
       - run: which python
       - name: Test
         uses: fylein/python-pytest-github-action@v1
-        run: pytest -s
+        with:
+          args: pytest tests -s
