@@ -20,5 +20,6 @@ jobs:
         uses: s-weigand/setup-conda@v1
       - run: conda --version
       - run: which python
+      - run: pip3 install pytest
       - name: Test
         run: python -m pytest -s
