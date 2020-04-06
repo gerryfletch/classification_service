@@ -20,6 +20,7 @@ jobs:
         uses: s-weigand/setup-conda@v1
       - run: conda --version
       - run: conda install -c anaconda pytest
+      - run: conda install pytorch torchvision -c pytorch
       - run: which python
       - run: pip3 install pytest
       - run: pytest
