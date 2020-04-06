@@ -12,9 +12,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
       - name: Initialize Conda Environment
         uses: s-weigand/setup-conda@v1
       - run: conda --version
-      - run: which python
-      - name: Test
-        run: pytest
+      - run: conda install -c anaconda pytest
+      - run: conda install pytorch torchvision -c pytorch
+      # - run: pip3 install pytest
+      - run: pytest -s
