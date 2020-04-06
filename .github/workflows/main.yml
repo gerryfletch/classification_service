@@ -12,11 +12,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Initialize Conda Environment
         uses: s-weigand/setup-conda@v1
       - run: conda --version
       - run: which python
       - name: Test
-        uses: fylein/python-pytest-github-action@v1
-        with:
-          args: pytest tests -s
+        run: pytest tests -s
