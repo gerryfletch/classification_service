@@ -19,7 +19,9 @@ jobs:
       - name: Initialize Conda Environment
         uses: s-weigand/setup-conda@v1
       - run: conda --version
+      - run: conda install -c anaconda pytest
       - run: which python
       - run: pip3 install pytest
+      - run: pytest
       - name: Test
         run: python -m pytest -s
