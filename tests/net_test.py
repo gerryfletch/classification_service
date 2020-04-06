@@ -1,6 +1,6 @@
 import pytest
-from datasource import DataSource
-from net import Network
+from classification.datasource import DataSource
+from classification.net import Network
 
 
 net = Network(accuracy_boundary=0.3)
