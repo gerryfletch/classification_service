@@ -51,6 +51,9 @@ class Network():
         return self._convert_tensor_to_classification(normalised_result)
 
     def _convert_tensor_to_classification(self, tensor: Tensor) -> [Classification]:
+        '''
+        Converts all results with more than five percent (5%) accuracy to classifications.
+        '''
         values, indexes = torch.topk(tensor, len(tensor))
         classifications = []
         for i in range(len(tensor)):

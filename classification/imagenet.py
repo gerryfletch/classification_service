@@ -2,6 +2,7 @@ import torchvision.transforms as transforms
 import functools
 from classification import labels
 from typing import Dict
+from nltk.corpus import wordnet
 
 # Normalize function for mean + standard deviation
 # used for all imagenet images.
@@ -27,8 +28,20 @@ class Label:
 
     def __init__(self, id: str, name: str, uri: str):
         self.id = id
+        self.syn = wordnet.of2ss(id)
         self.name = name
         self.uri = uri
+
+    def is_a(self, synset) -> bool:
+        if self.syn == synset:
+            return True
+        hypernyms = self.syn.hypernyms()
+        while synset not in hypernyms:
+            hypernyms = hypernyms[0].hypernyms()
+            if hypernyms == []:
+                return False
+        return synset in hypernyms
+
 
 
 @functools.lru_cache(maxsize=1, typed=False)

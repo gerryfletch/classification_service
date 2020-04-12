@@ -3,126 +3,112 @@ from nltk.corpus import wordnet
 from classification.datasource import DataSource
 from classification.imagenet import Label
 from classification.net import Classification
-
-
-dog = wordnet.synsets("dog")[0]
-terrier = wordnet.synsets("terrier")[0]
-retriever = wordnet.synsets("retriever")[0]
-
-cat = wordnet.synsets("cat")[0]
-
-
-australian_terrier = wordnet.of2ss('02096294-n')
-silky_terrier = wordnet.of2ss('02097658-n')
-yorkshire_terrier = wordnet.of2ss('02094433-n')
-
-labrador_retriever = wordnet.of2ss('02099712-n')
-
-egyptian_cat = wordnet.of2ss('02124075-n')
-
-animal = wordnet.synsets("animal")[0]
-
-piano = wordnet.synsets("piano")[0]
-guitar = wordnet.synsets("guitar")[0]
-drum = wordnet.synsets("drum")[0]
-instrument = wordnet.synsets("instrument")[0]
-
-religious_person = wordnet.synsets("religion")[0]
+from typing import Optional
 
 
 class Node:
-  def __init__(self, synset, children: []):
-    self.synset = synset
-    self.children = children
-    self.count = 0
+    def __init__(self, word: str, depth: int, parent, children: [] = []):
+        self.synset = wordnet.synsets(word)[0]
+        self.depth = depth
+        self.parent = parent
+        self.children = children
+        self.count = 0
+
+    def __str__(self):
+        return f"Synset: {self.synset}, Depth: {self.depth}, Count: {self.count}"
 
 
-cat_node = Node(cat, [])
+# Tree Construction
+root_node = Node("entity", 0, None)
 
-terrier_node = Node(terrier, [])
-retriever_node = Node(retriever, [])
+# depth 1
+animal_node = Node("animal", 1, root_node)
+instrument_node = Node("instrument", 1, root_node)
+root_node.children = [animal_node, instrument_node]
 
-dog_node = Node(dog, [terrier_node, retriever_node])
+# depth 2
+cat_node = Node("cat", 2, animal_node)
+dog_node = Node("dog", 2, animal_node)
+animal_node.children = [cat_node, dog_node]
 
-animal_node = Node(animal, [dog_node, cat_node])
+piano_node = Node("piano", 2, instrument_node)
+guitar_node = Node("guitar", 2, instrument_node)
+drum_node = Node("drum", 2, instrument_node)
+instrument_node.children = [piano_node, guitar_node, drum_node]
 
-piano_node = Node(piano, [])
-guitar_node = Node(guitar, [])
-drum_node = Node(drum, [])
-instrument_node = Node(instrument, [piano_node, guitar_node, drum_node])
-
-class_hierarchy = Node(None, [animal_node, instrument_node])
-
-class Place:
-  def __init__(self, node: Node, similarity: float):
-    self.node = node
-    self.similarity = similarity
-
-def go(synset):
-  p = place(synset, class_hierarchy, 0)
-  if p.similarity >= 0.5:
-    p.node.count = p.node.count + 1
-  return p
-
-def place(synset, root, best_similarity):
-  best_node = root
-  for node in root.children:
-    similarity = calc_sim(synset, node.synset)
-    if similarity > best_similarity:
-      best_similarity = similarity
-      best_node = node
-  if best_node == root:
-    print(best_similarity)
-    return Place(best_node, best_similarity)
-  else:
-    return place(synset, best_node, best_similarity)
-
-
-def calc_sim(s1, s2):
-  # s1.wup_similarity(s2)
-  # return s1.path_similarity(s2)
-  return s1.lch_similarity(s2)
-
-
-class Group:
-  def __init__(self, node: Node, similarity: float):
-    self.node = node
-    self.similarity = similarity
+# depth 3
+terrier_node = Node("terrier", 3, dog_node)
+retriever_node = Node("retriever", 3, dog_node)
+dog_node.children = [terrier_node, retriever_node]
 
 
 class Hierarchy:
 
     def __init__(self):
-        nltk.download('wordnet')
+        self.root = root_node
 
-    def get_synset(self, id: str):
-        return wordnet.of2ss(id)
+    def group_classification(self, classifications: [Classification]):
+        curated_set = self.curate_initial_set(classifications)
+        if curated_set == {}:
+            return None
 
-    def add_classification(self, classification: Classification) -> Group:
-      synset = self.get_synset(classification.label.id)
-      hypernyms = synset.hypernyms
-      group = self.identify_group(synset, class_hierarchy, 0)
-      if group.similarity > 0.5:
-        print(f"Placing classification {synset} in group {group.node.synset}.")
-        group.node.count = group.node.count + 1
-      return group
+        # continuously reduce the curated set until an appropriate category
+        # is found, and if it is never found, return None
+        while self.select_highest(curated_set) is None:
+            curated_set = self.reduce(curated_set)
+            if curated_set is None:
+                return None
 
-    # def identify_is_a_group(self, hypernyms, root: Node) -> Node:
-    #   if root.synset in hypernyms:
-    #     return root
-    #   for node in root.children:
+        top_node = self.select_highest(curated_set)
+        if top_node is not None:
+            top_node.count = top_node.count + 1
+        return top_node
 
-    def identify_group(self, synset, root: Node, best_similarity: int) -> Group:
-      best_node = root
-      for node in root.children:
-        similarity = self.calc_similarity(synset, node.synset)
-        if similarity > best_similarity:
-          best_similarity = similarity
-          best_node = node
-      if best_node == root:
-        return Group(best_node, best_similarity)
-      else:
-        return self.identify_group(synset, best_node, best_similarity)
+    def curate_initial_set(self, classifications: [Classification]) -> dict:
+        curated_set = {}
+        for classification in classifications:
+            closest_node = self.find_closest(classification, self.root)
+            if closest_node == None or closest_node == self.root:
+                continue
+            if closest_node in curated_set:
+                curated_set[closest_node] = curated_set[closest_node] + \
+                    classification.accuracy
+            else:
+                curated_set[closest_node] = classification.accuracy
+            print(
+                f"{classification.label.name} fits group {closest_node} with total accuracy: {curated_set[closest_node]}")
+        return curated_set
 
-    def calc_similarity(self, s1, s2):
-      return s1.lch_similarity(s2)
+    def find_closest(self, c: Classification, node: Node) -> Node:
+        for child_node in node.children:
+            if c.label.is_a(child_node.synset):
+                return self.find_closest(c, child_node)
+        return node
+
+    def reduce(self, curated_set: dict):
+        max_depth = max(map(lambda n: n.depth, curated_set))
+        if max_depth == 1:
+            return None
+        deep_nodes = list(filter(lambda n: n.depth == max_depth, curated_set))
+        for node in deep_nodes:
+            parent = node.parent
+            if parent in curated_set:
+                curated_set[parent] = curated_set[parent] + curated_set[node]
+            else:
+                curated_set[parent] = curated_set[node]
+            del curated_set[node]
+
+    def select_highest(self, curated_set: dict) -> Optional[Node]:
+        for node in curated_set:
+            if curated_set[node] >= 0.70:
+                return node
+
+    def print(self):
+        self._print(self.root)
+
+    def _print(self, node: Node):
+        if node is None:
+            return
+        print(node)
+        for child in node.children:
+            self._print(child)
