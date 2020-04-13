@@ -18,7 +18,7 @@ urls = [
 
 
 net = Network(accuracy_boundary=0)
-h = Hierarchy()
+h = Hierarchy(0.7)
 
 for i in range(len(urls)):
     ds = DataSource(urls[i])
@@ -34,15 +34,4 @@ for i in range(len(urls)):
             classification.label.id
         ))
     
-    h.group_classification(classifications)
-
-h.print()
-
-
-australian_terrier = wordnet.of2ss('02096294-n')
-silky_terrier = wordnet.of2ss('02097658-n')
-yorkshire_terrier = wordnet.of2ss('02094433-n')
-
-labrador_retriever = wordnet.of2ss('02099712-n')
-
-egyptian_cat = wordnet.of2ss('02124075-n')
+    h.place(classifications)

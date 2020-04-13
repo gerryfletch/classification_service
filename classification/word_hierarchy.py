@@ -3,7 +3,7 @@ from nltk.corpus import wordnet
 from classification.datasource import DataSource
 from classification.imagenet import Label
 from classification.net import Classification
-from typing import Optional
+from typing import Optional, Dict
 
 
 class Node:
@@ -42,73 +42,100 @@ retriever_node = Node("retriever", 3, dog_node)
 dog_node.children = [terrier_node, retriever_node]
 
 
-class Hierarchy:
+class Curation:
+    def __init__(self, classifications: [Classification]):
+        self.curated = self.curate_classifications(classifications)
 
-    def __init__(self):
-        self.root = root_node
-
-    def group_classification(self, classifications: [Classification]):
-        curated_set = self.curate_initial_set(classifications)
-        if curated_set == {}:
-            return None
-
-        # continuously reduce the curated set until an appropriate category
-        # is found, and if it is never found, return None
-        while self.select_highest(curated_set) is None:
-            curated_set = self.reduce(curated_set)
-            if curated_set is None:
-                return None
-
-        top_node = self.select_highest(curated_set)
-        if top_node is not None:
-            top_node.count = top_node.count + 1
-        return top_node
-
-    def curate_initial_set(self, classifications: [Classification]) -> dict:
-        curated_set = {}
+    def curate_classifications(self, classifications: [Classification]) -> Dict[Node, float]:
+        '''
+        Finds the closest suitable node for a classification and keys it against the accuracy.
+        If there is no suitable node, the classification is discarded.
+        Classifications with the same node are combined.
+        See self.combine
+        '''
+        curated = {}
         for classification in classifications:
-            closest_node = self.find_closest(classification, self.root)
-            if closest_node == None or closest_node == self.root:
+            closest_node = self.find_closest_node(classification, root_node)
+            # discard classification if the closest node is the root
+            if closest_node == root_node:
                 continue
-            if closest_node in curated_set:
-                curated_set[closest_node] = curated_set[closest_node] + \
-                    classification.accuracy
-            else:
-                curated_set[closest_node] = classification.accuracy
-            print(
-                f"{classification.label.name} fits group {closest_node} with total accuracy: {curated_set[closest_node]}")
-        return curated_set
+            self.combine(curated, closest_node, classification.accuracy)
+        return curated
 
-    def find_closest(self, c: Classification, node: Node) -> Node:
-        for child_node in node.children:
-            if c.label.is_a(child_node.synset):
-                return self.find_closest(c, child_node)
+    def find_closest_node(self, classification: Classification, node: Node) -> Node:
+        for child in node.children:
+            if classification.label.is_a(child.synset):
+                return self.find_closest_node(classification, child)
         return node
 
-    def reduce(self, curated_set: dict):
-        max_depth = max(map(lambda n: n.depth, curated_set))
-        if max_depth == 1:
-            return None
-        deep_nodes = list(filter(lambda n: n.depth == max_depth, curated_set))
-        for node in deep_nodes:
-            parent = node.parent
-            if parent in curated_set:
-                curated_set[parent] = curated_set[parent] + curated_set[node]
-            else:
-                curated_set[parent] = curated_set[node]
-            del curated_set[node]
-
-    def select_highest(self, curated_set: dict) -> Optional[Node]:
-        for node in curated_set:
-            if curated_set[node] >= 0.70:
+    def get_node_above_accuracy(self, accuracy_threshold: float) -> Optional[Node]:
+        '''
+        Selects the first node with an accuracy greater than or equal to the threshold.
+        '''
+        for node, accuracy in self.curated.items():
+            if accuracy >= accuracy_threshold:
                 return node
+        return None
 
-    def print(self):
-        self._print(self.root)
+    def combine(self, d: Dict[Node, float], n: Node, a: float):
+        '''
+        Sums the value at d[n] with a, storing the result in d[n].
+        '''
+        if n in d:
+            d[n] = d[n] + a
+        else:
+            d[n] = a
 
-    def _print(self, node: Node):
-        if node is None:
+    def reduce_until(self, threshold: float) -> Optional[Node]:
+        '''
+        Continuously reduces the classifications until a group has
+        an accuracy greater than or equal to the treshold.
+        If this threshold is never met, or the group is generalised
+        to the object level, None is returned.
+        '''
+        while self.get_node_above_accuracy(threshold) == None:
+            self.reduce()
+            if self.curated == {}:
+                # reduced to empty set
+                return None
+        return self.get_node_above_accuracy(threshold)
+
+    def reduce(self):
+        '''
+        Lifts the lowest classifications in the curated graph by
+        one level, and accumulates the accuracies of common
+        classifications. For example,
+        (name=Dog_A, depth=2, accuracy=0.30)
+        (name=Dog_B, depth=2, accuracy=0.35)
+        Would reduce to
+        (name=Animal, depth=1, accuracy=0.30)
+        (name=Animal, depth=1, accuracy=0.35)
+        The accuracies are then accumulated, resulting in:
+        (name=Animal, depth=1, accuracy=0.65)
+        '''
+        if self.curated == {}:
             return
-        print(node)
-        for child in node.children:
-            self._print(child)
+
+        max_depth = max(map(lambda n: n.depth, self.curated))
+        if max_depth == 1:
+            self.curated = {}
+
+        deep_nodes = list(filter(lambda n: n.depth == max_depth, self.curated))
+
+        for child in deep_nodes:
+            accuracy = self.curated[child]
+            parent = child.parent
+            self.combine(self.curated, parent, accuracy)
+            del self.curated[child]
+
+
+class Hierarchy:
+    def __init__(self, accuracy_threshold: float):
+        self.accuracy_threshold = accuracy_threshold
+
+    def place(self, classifications: [Classification]):
+        curation = Curation(classifications)
+        curated_group = curation.reduce_until(self.accuracy_threshold)
+        if curated_group is not None:
+            # todo store the results in a database
+            print("Storing classification in group: " + str(curated_group.synset))
