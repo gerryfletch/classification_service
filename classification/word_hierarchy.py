@@ -18,7 +18,7 @@ class Node:
         return f"Synset: {self.synset}, Depth: {self.depth}, Count: {self.count}"
 
 
-# Tree Construction
+# Doubly-Connected Tree Construction
 root_node = Node("entity", 0, None)
 
 # depth 1
@@ -43,6 +43,24 @@ dog_node.children = [terrier_node, retriever_node]
 
 
 class Curation:
+    '''
+    Class to handle all the logic for grouping classifications
+    against the curated tree. The algorithm is composed of
+    reduce and combine operations.
+
+    First, each classification is matched against a node based
+    on is-a relationships into a curation dictionary.
+    Classifications matching the root node are discarded, and
+    nodes with multiple matches are combined, accumulating the
+    classification accuracy.
+
+    Then the client may reduce the curation until an accuracy
+    threshold is met. The lowest (deepest) nodes in the
+    curated tree are lifted by one layer, combining their
+    accuracy with their parents.
+    See Curation#reduce for a detailed example.
+    '''
+
     def __init__(self, classifications: [Classification]):
         self.curated = self.curate_classifications(classifications)
 
@@ -63,6 +81,11 @@ class Curation:
         return curated
 
     def find_closest_node(self, classification: Classification, node: Node) -> Node:
+        '''
+        Recursively visits nodes based on their is-a relationship.
+        In a set of child nodes, logically only one may have an is-a relationship.
+        If no children nodes hold this relationship, the current node is returned.
+        '''
         for child in node.children:
             if classification.label.is_a(child.synset):
                 return self.find_closest_node(classification, child)
@@ -138,4 +161,5 @@ class Hierarchy:
         curated_group = curation.reduce_until(self.accuracy_threshold)
         if curated_group is not None:
             # todo store the results in a database
-            print("Storing classification in group: " + str(curated_group.synset))
+            print("Storing classification in group: " +
+                  str(curated_group.synset))
