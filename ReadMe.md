@@ -32,7 +32,7 @@ The [Neural Network API](./classification/net.py) will default to an accuracy to
 The [Word Hierarchy API](./classification/word_hierarchy.py) accepts a list of classifications.
 
 ### 1. Closest-Node Grouping
-Each classification is grouped with the closest node in the curated tree based on the labels
+Each classification is grouped with the closest node in the curated tree based on the label's
 `is-a` relationship to the node's name. Specifically, this step recursively retrieves
 the hypernyms of the label and checks for the existence of the node name. In the general sense, this allows
 checks such as `cat is-a animal`.
@@ -76,44 +76,65 @@ is continuously reduced and combined until either:
 - the tree is reduced to the `entity` (root) node
 
 Reducing the tree works by selecting the deepest nodes, and combining their accuracy
-with their parent. If the neural network was 20% certain that the image was a `dog`
-(based on generalisation of some lower breed, e.g dalmation), and 55% certain that
-the image was a form of terrier, the tree would look like this after the initial
-closest-match phase:
+with their parent. Continuing from the example in step one, the deepest node is
+`terriers` with a depth of 3 (denoted by the left-side number in the display below).
 
 ```
-entity
-  - animals
-    - dogs (accuracy=0.20)
-      - terriers (accuracy=0.55)
-      - retrievers
-    - cats
-  - instruments
-    - drum
-    - piano
-    - guitar
+0 entity
+  1 - animals
+    2 - dogs
+      3 - terriers | accuracy = 0.6 (0.3 + 0.3)
+      3 - retrievers
+    2 - cats | accuracy = 0.4
+  1 - instruments
+    2 - drum
+    2 - piano
+    2 - guitar
 ```
 
-The reduce step identifies `terriers` as the lowest node, and combines its accuracy
-result with its parent, `dogs`. The terrier accuracy is then discarded, forming
-the following tree:
+The accuracies for the `terriers` node are combined with the accuracy of it's parent,
+the `dogs` node, which has an implicit accuracy of zero. The tree now looks like this:
+
 ```
-entity
-  - animals
-    - dogs (accuracy=0.75)
-      - terriers
-      - retrievers
-    - cats
-  - instruments
-    - drum
-    - piano
-    - guitar
+0 entity
+  1 - animals
+    2 - dogs | accuracy = 0.6 (0.3 + 0.3)
+      3 - terriers
+      3 - retrievers
+    2 - cats | accuracy = 0.4
+  1 - instruments
+    2 - drum
+    2 - piano
+    2 - guitar
 ```
 
-An accuracy greater than the threshold has now been met, so the classification result
-is `dogs`. This is an overly simplistic example, but this algorithm is designed to
-work for both small graphs such as this example and highly distributed trees
-where there may be many classifications with low accuracies. 
+When the reduction phase is applied again, the deepest nodes are both `dogs` and `cats`.
+The accuracies of each are lifted to their parent, which is shared by both nodes: `animals`.
+Since the node is shared, the accuracies are combined, resulting in the following tree:
+
+```
+0 entity
+  1 - animals | accuracy = 1.0 (0.4 + (0.3 + 0.3))
+    2 - dogs
+      3 - terriers
+      3 - retrievers
+    2 - cats
+  1 - instruments
+    2 - drum
+    2 - piano
+    2 - guitar
+```
+
+The result is a one hundred percent certainty that the classified image was of an `animal`.
+Since the threshold (`>= 0.7`) has been met, the resulting node is returned to the client.
+
+### Conclusion
+The example given is overly simplistic and works within a very small universe of
+possibilities. This algorithm is designed to work for highly distributed trees
+with very granular results. The continuous reduction step is an alternative to
+relying on the similarity (e.g Wu-Palmer) of nouns to accumulate accuracies and 
+eventually pick a node, which only works if the universe of the neural network
+results is enclosed in the curated tree.
 
 ## Usage
 -
