@@ -48,10 +48,9 @@ Some classifications are granular and consist of low-accuracy results for simila
 example is terrier dog breeds:
 
 ```
-Accuracy of Australian terrier : 23 %
-Accuracy of silky terrier, Sydney silky : 20 %
-Accuracy of Yorkshire terrier : 17 %
-... other irrelevant accuracies
+Accuracy of Australian terrier : 39 %
+Accuracy of silky terrier, Sydney silky : 36 %
+Accuracy of Yorkshire terrier : 23 %
 ```
 
 If there is no node with an accuracy greater than a threshold (default 70%), the tree is
@@ -59,22 +58,44 @@ continuously reduced and combined until either a node meets the treshold or the 
 has been generalised to the `entity` root node.
 
 Reducing the tree works by selecting the deepest nodes, and combining their accuracy
-with their parent. Using the terrier example, after the initial phase of grouping the
-classifications with the closest node and accumulating their accuracies, the initial
-tree would look like this:
+with their parent. If the neural network was 20% certain that the image was a `dog`
+(based on generalisation of some lower breed, e.g dalmation), and 55% certain that
+the image was a form of terrier, the tree would look like this after the initial
+closest-match phase:
 
 ```
 entity
   - animals
-    - dogs
-      - terriers (accuracy=0.60, ['australian terrier', 'silky terrier', 'yorkshire terrier'])
+    - dogs (accuracy=0.20)
+      - terriers (accuracy=0.55)
       - retrievers
     - cats
   - instruments
     - drum
     - piano
     - guitar
+```
 
+The reduce step identifies `terriers` as the lowest node, and combines its accuracy
+result with its parent, `dogs`. The terrier accuracy is then discarded, forming
+the following tree:
+```
+entity
+  - animals
+    - dogs (accuracy=0.75)
+      - terriers
+      - retrievers
+    - cats
+  - instruments
+    - drum
+    - piano
+    - guitar
+```
+
+An accuracy greater than the threshold has now been met, so the classification result
+is `dogs`. This is an overly simplistic example, but this algorithm is designed to
+work for both small graphs such as this example and highly distributed trees
+where there may be many classifications with low accuracies. 
 
 ## Usage
 -
