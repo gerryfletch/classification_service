@@ -156,10 +156,11 @@ class Hierarchy:
     def __init__(self, accuracy_threshold: float):
         self.accuracy_threshold = accuracy_threshold
 
-    def place(self, classifications: [Classification]):
+    def place(self, classifications: [Classification]) -> Optional[Node]:
         curation = Curation(classifications)
         curated_group = curation.reduce_until(self.accuracy_threshold)
         if curated_group is not None:
             # todo store the results in a database
             print("Storing classification in group: " +
                   str(curated_group.synset))
+        return curated_group

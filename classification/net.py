@@ -8,16 +8,16 @@ from classification.imagenet import Label
 
 
 class Classification:
-    accuracy: int
+    accuracy: float
     label: Label
 
-    def __init__(self, accuracy: int, label: Label):
+    def __init__(self, accuracy: float, label: Label):
         self.accuracy = accuracy
         self.label = label
 
 
 class Network():
-    def __init__(self, accuracy_boundary: int = 0.6, use_cuda: bool = False):
+    def __init__(self, accuracy_boundary: float = 0.6, use_cuda: bool = False):
         self.accuracy_boundary = accuracy_boundary
         self.use_cuda = use_cuda
         model = models.resnet152(pretrained=True)
