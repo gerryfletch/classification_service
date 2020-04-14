@@ -17,7 +17,7 @@ class Classification:
 
 
 class Network():
-    def __init__(self, accuracy_boundary: float = 0.6, use_cuda: bool = False):
+    def __init__(self, accuracy_boundary: float = 0.05, use_cuda: bool = False):
         self.accuracy_boundary = accuracy_boundary
         self.use_cuda = use_cuda
         model = models.resnet152(pretrained=True)
