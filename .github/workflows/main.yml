@@ -20,5 +20,6 @@ jobs:
         uses: s-weigand/setup-conda@v1
       - run: conda --version
       - run: conda install -c anaconda pytest
+      - run: conda install nltk
       - run: conda install pytorch torchvision -c pytorch
       - run: pytest -s

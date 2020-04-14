@@ -9,10 +9,10 @@ golden_retriever_url = "https://post.healthline.com/wp-content/uploads/sites/3/2
 
 def test_sanity_recognition_with_datasource():
     ds = DataSource(golden_retriever_url)
-    assert net.classify(ds)[0].label == 'golden retriever'
+    assert net.classify(ds)[0].label.name == 'golden retriever'
 
 def test_sanity_recognition_with_url():
-    assert net.classify_url(golden_retriever_url)[0].label == 'golden retriever'
+    assert net.classify_url(golden_retriever_url)[0].label.name == 'golden retriever'
 
 def test_sanity_recognition_accuracy():
-    pass
+    assert net.classify_url(golden_retriever_url)[0].accuracy >= 0.3
