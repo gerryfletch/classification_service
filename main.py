@@ -26,8 +26,6 @@ for i in range(len(urls)):
 
     for i in range(len(classifications)):
         classification = classifications[i]
-        if classification.accuracy * 100 == 0:
-            print("classification accuracy is zero")
         print('Accuracy of %5s : %2d %%. Id: %s' % (
             classification.label.name,
             classification.accuracy * 100,
@@ -35,3 +33,4 @@ for i in range(len(urls)):
         ))
     
     h.place(classifications)
+    print("\n\n")
