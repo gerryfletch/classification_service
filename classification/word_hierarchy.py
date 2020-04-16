@@ -7,8 +7,13 @@ from typing import Optional, Dict
 
 
 class Node:
-    def __init__(self, synset, depth: int, parent):
-        self.synset = synset
+
+    synsets: list
+    depth: int
+    children: list
+
+    def __init__(self, synsets, depth: int, parent):
+        self.synsets = synsets
         self.depth = depth
         self.parent = parent
         self.children = []
@@ -21,7 +26,7 @@ class Node:
         '''
         Creates a node from a synset object.
         '''
-        return Node(synset, depth, parent)
+        return Node([synset], depth, parent)
 
     @staticmethod
     def from_qualified_synset(qualified_synset, depth, parent):
@@ -31,7 +36,7 @@ class Node:
         food.n.1
         '''
         synset = wordnet.synset(qualified_synset)
-        return Node(synset, depth, parent)
+        return Node([synset], depth, parent)
 
     @staticmethod
     def from_word(word, depth, parent):
@@ -42,10 +47,10 @@ class Node:
         '''
         word.replace(" ", "_")
         synset = wordnet.synsets(word)[0]
-        return Node(synset, depth, parent)
+        return Node([synset], depth, parent)
 
     def __str__(self):
-        return f"Synset: {self.synset}, Depth: {self.depth}, Count: {self.count}"
+        return f"Synset: {self.synsets}, Depth: {self.depth}, Count: {self.count}"
 
 
 # Doubly-Connected Tree Construction
@@ -114,7 +119,8 @@ class Curation:
         If no children nodes hold this relationship, the current node is returned.
         '''
         for child in node.children:
-            if classification.label.is_a(child.synset):
+            # TODO use whole list rather than the head
+            if classification.label.is_a(child.synsets[0]):
                 return self.find_closest_node(classification, child)
         return node
 
@@ -197,7 +203,7 @@ class Hierarchy:
         curation = Curation(classifications)
         curated_group = curation.reduce_until(self.accuracy_threshold)
         if curated_group is not None:
-            print(f"{curated_group.synset.lemma_names()[0]}")
+            print(f"{curated_group.synsets[0].lemma_names()[0]}")
             self._store(curated_group)
         else:
             print("n/a - top n/3 categories:")
