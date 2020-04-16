@@ -1,9 +1,6 @@
 from classification.datasource import DataSource
 from classification.net import Network
 from classification.word_hierarchy import Hierarchy
-from classification.word_hierarchy import animal_node, instrument_node
-
-from nltk.corpus import wordnet
 
 data = [
     # 3 retrievers
