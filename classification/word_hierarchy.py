@@ -23,7 +23,7 @@ root_node = Node("entity", 0, None)
 
 # depth 1
 animal_node = Node("animal", 1, root_node)
-instrument_node = Node("instrument", 1, root_node)
+instrument_node = Node("musical_instrument", 1, root_node)
 root_node.children = [animal_node, instrument_node]
 
 # depth 2
@@ -153,14 +153,56 @@ class Curation:
 
 
 class Hierarchy:
+    '''
+    The Hierarchy class is responsible for maintaining the catalog
+    of classification nodes and their respective metadata, providing
+    query functions for placed classifications.
+    '''
+
+    accuracy_threshold: float
+    hierarchy: Dict[Node, int]
+
     def __init__(self, accuracy_threshold: float):
         self.accuracy_threshold = accuracy_threshold
+        self.hierarchy = {}
 
     def place(self, classifications: [Classification]) -> Optional[Node]:
         curation = Curation(classifications)
         curated_group = curation.reduce_until(self.accuracy_threshold)
         if curated_group is not None:
-            # todo store the results in a database
-            print("Storing classification in group: " +
-                  str(curated_group.synset))
+            print(f"{curated_group.synset.lemma_names()[0]}")
+            self._store(curated_group)
+        else:
+            print("n/a - top n/3 categories:")
+            for i in range(min(3, len(classifications))):
+                print(f"{classifications[i].label.name} : {classifications[i].accuracy}")
         return curated_group
+
+    def query_recursive_count(self, root: Node) -> int:
+        total = self.hierarchy.get(root, 0)
+        for child in root.children:
+            total += self.query_recursive_count(child)
+        return total
+
+    def query_count(self, node: Node) -> int:
+        return self.hierarchy.get(node, 0)
+
+    def _store(self, node: Node):
+        self.hierarchy.setdefault(node, 0)
+        self.hierarchy[node] = self.hierarchy[node] + 1
+
+    def print(self):
+        self._print(root_node)
+
+    def _print(self, node: Node):
+        string = ""
+        for i in range(node.depth):
+            string += "  "
+        count = self.query_count(node)
+        name = node.synset.lemma_names()[0]
+        string += f"{str(name)} - count: {count}"
+
+        print(string)
+
+        for child in node.children:
+            self._print(child)

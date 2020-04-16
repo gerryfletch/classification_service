@@ -21,3 +21,9 @@ def test_dog_is_cat():
     cat = wordnet.of2ss('02123045-n')
 
     assert not dog.is_a(cat)
+
+def test_piano_is_instrument():
+    piano = Label('04515003-n', 'upright, upright piano', '')
+    instrument = wordnet.synsets('musical_instrument')[0]
+
+    assert piano.is_a(instrument)
