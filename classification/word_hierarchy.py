@@ -7,39 +7,66 @@ from typing import Optional, Dict
 
 
 class Node:
-    def __init__(self, word: str, depth: int, parent, children: [] = []):
-        self.synset = wordnet.synsets(word)[0]
+    def __init__(self, synset, depth: int, parent):
+        self.synset = synset
         self.depth = depth
         self.parent = parent
-        self.children = children
-        self.count = 0
+        self.children = []
+
+        if parent is not None:
+            parent.children.append(self)
+
+    @staticmethod
+    def from_synset(synset, depth, parent):
+        '''
+        Creates a node from a synset object.
+        '''
+        return Node(synset, depth, parent)
+
+    @staticmethod
+    def from_qualified_synset(qualified_synset, depth, parent):
+        '''
+        Looks up the synset based on a fully qualified name, e.g:
+        food.n.01
+        food.n.1
+        '''
+        synset = wordnet.synset(qualified_synset)
+        return Node(synset, depth, parent)
+
+    @staticmethod
+    def from_word(word, depth, parent):
+        '''
+        Looks up the synset based on the name alone, e.g:
+        'musical instrument' -> 'musical_instrument.n.01'
+        Spaces are automatically replaced with underscores.
+        '''
+        word.replace(" ", "_")
+        synset = wordnet.synsets(word)[0]
+        return Node(synset, depth, parent)
 
     def __str__(self):
         return f"Synset: {self.synset}, Depth: {self.depth}, Count: {self.count}"
 
 
 # Doubly-Connected Tree Construction
-root_node = Node("entity", 0, None)
+root_node = Node.from_word("entity", 0, None)
 
 # depth 1
-animal_node = Node("animal", 1, root_node)
-instrument_node = Node("musical_instrument", 1, root_node)
-root_node.children = [animal_node, instrument_node]
+animal_node = Node.from_word("animal", 1, root_node)
+instrument_node = Node.from_word("musical_instrument", 1, root_node)
+food_node = Node.from_qualified_synset("food.n.02", 1, root_node)
 
 # depth 2
-cat_node = Node("cat", 2, animal_node)
-dog_node = Node("dog", 2, animal_node)
-animal_node.children = [cat_node, dog_node]
+cat_node = Node.from_word("cat", 2, animal_node)
+dog_node = Node.from_word("dog", 2, animal_node)
 
-piano_node = Node("piano", 2, instrument_node)
-guitar_node = Node("guitar", 2, instrument_node)
-drum_node = Node("drum", 2, instrument_node)
-instrument_node.children = [piano_node, guitar_node, drum_node]
+piano_node = Node.from_word("piano", 2, instrument_node)
+guitar_node = Node.from_word("guitar", 2, instrument_node)
+drum_node = Node.from_word("drum", 2, instrument_node)
 
 # depth 3
-terrier_node = Node("terrier", 3, dog_node)
-retriever_node = Node("retriever", 3, dog_node)
-dog_node.children = [terrier_node, retriever_node]
+terrier_node = Node.from_word("terrier", 3, dog_node)
+retriever_node = Node.from_word("retriever", 3, dog_node)
 
 
 class Curation:

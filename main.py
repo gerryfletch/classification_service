@@ -3,6 +3,8 @@ from classification.net import Network
 from classification.word_hierarchy import Hierarchy
 from classification.word_hierarchy import animal_node, instrument_node
 
+from nltk.corpus import wordnet
+
 data = [
     # 3 retrievers
     {'description': "golden retriever puppy",
@@ -65,6 +67,13 @@ data = [
         "https://www.pmtonline.co.uk/media/catalog/product/cache/1/image/2400x/9df78eab33525d08d6e5fb8d27136e95/7/9/79293-304864-eastcoast-d1sce-satin-natural-front.jpg")},
     {'description': 'girl playing guitar', 'ds': DataSource(
         "https://previews.123rf.com/images/sheftsoff/sheftsoff1708/sheftsoff170805882/84081992-girl-sings-and-playing-guitar-musician-with-acoustic-guitar.jpg")},
+
+    # food
+    {'description': 'bagels', 'ds': DataSource("https://spicesnflavors.com/wp-content/uploads/2020/01/bagel.jpg")},
+    {'description': 'ice cream date', 'ds': DataSource("https://i.pinimg.com/originals/5f/67/74/5f6774af64f417c21fb4279462885c7b.jpg")},
+    {'description': 'burger date', 'ds': DataSource("https://res.cloudinary.com/twenty20/private_images/t_watermark-criss-cross-10/v1538372066000/photosp/d32464f9-1757-4fec-ac5e-f70a899aebc5/stock-photo-fast-food-burger-fries-date-junk-food-unhealthy-burgers-vegan-food-hand-in-frame-d32464f9-1757-4fec-ac5e-f70a899aebc5.jpg")},
+    {'description': 'burger', 'ds': DataSource("https://www.thespruceeats.com/thmb/l4w6PvMqsz1EjueCAh_foPmYafM=/3456x3456/smart/filters:no_upscale()/garlic-burger-patties-333503-hero-01-e4df660ff27b4e5194fdff6d703a4f83.jpg")},
+    {'description': 'fruit plate', 'ds': DataSource("https://www.fergusonplarre.com.au/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/f/r/fruit-platter.jpg")}
 ]
 
 
