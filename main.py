@@ -53,7 +53,7 @@ data = [
     {'description': 'drum kit', 'ds': DataSource(
         "https://www.thomann.de/pics/bdb/482751/14772471_800.jpg")},
     {'description': 'regiment drum', 'ds': DataSource(
-        "https://lh3.googleusercontent.com/proxy/1AivOrmIVzGK1N_mELmnB_XZ-3fbeUNiFabkB2C2GyzsVufcMrTpXnoEyEr2ZJls1of9NGXl2ukm_vh3-D3q_hxHMzI")},
+        "https://c8.alamy.com/comp/T7XXFE/a-british-marching-drum-for-the-cameronians-scottish-rifles-20th-century-painted-brass-body-with-wooden-frame-and-white-tension-ropes-intact-drumheads-the-front-bears-the-regimental-coat-of-arms-with-numerous-battle-names-height-37-cm-diameter-37-cm-two-earlier-regiments-the-26th-cameronian-regiment-and-the-90th-perthshire-light-infantry-regiment-were-amalgamated-in-1881-to-form-this-regiment-as-a-rifle-regiment-the-cameronians-had-no-colours-but-displayed-their-battle-honours-on-the-regimental-drums-historic-historical-additional-rights-clearance-info-not-available-T7XXFE.jpg")},
     {'description': 'djembe drum', 'ds': DataSource(
         "https://images-na.ssl-images-amazon.com/images/I/91ONQ0gCRcL._SL1500_.jpg")},
     {'description': 'drummer playing drums', 'ds': DataSource(

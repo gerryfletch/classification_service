@@ -8,18 +8,18 @@ from nltk.corpus import wordnet
 
 def test_node_from_word():
     node = Node.from_word('dog', 0, None)
-    assert node.synset == wordnet.synset('dog.n.01')
+    assert node.synsets == [wordnet.synset('dog.n.01')]
 
 
 def test_node_from_qualified_synset():
     node = Node.from_qualified_synset('dog.n.01', 0, None)
-    assert node.synset == wordnet.synset('dog.n.01')
+    assert node.synsets == [wordnet.synset('dog.n.01')]
 
 
 def test_node_from_synset():
     syn = wordnet.synset('dog.n.01')
     node = Node.from_synset(syn, 0, None)
-    assert node.synset == syn
+    assert node.synsets == [syn]
 
 
 def test_terrier_groups_terrier():

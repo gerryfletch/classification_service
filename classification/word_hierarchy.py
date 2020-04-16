@@ -7,8 +7,13 @@ from typing import Optional, Dict
 
 
 class Node:
-    def __init__(self, synset, depth: int, parent):
-        self.synset = synset
+
+    synsets: list
+    depth: int
+    children: list
+
+    def __init__(self, synsets, depth: int, parent):
+        self.synsets = synsets
         self.depth = depth
         self.parent = parent
         self.children = []
@@ -17,24 +22,33 @@ class Node:
             parent.children.append(self)
 
     @staticmethod
-    def from_synset(synset, depth, parent):
+    def from_synset(synset, depth: int, parent):
         '''
         Creates a node from a synset object.
         '''
-        return Node(synset, depth, parent)
+        return Node([synset], depth, parent)
 
     @staticmethod
-    def from_qualified_synset(qualified_synset, depth, parent):
+    def from_qualified_synset(qualified_synset: str, depth: int, parent):
         '''
         Looks up the synset based on a fully qualified name, e.g:
         food.n.01
         food.n.1
         '''
         synset = wordnet.synset(qualified_synset)
-        return Node(synset, depth, parent)
+        return Node([synset], depth, parent)
 
     @staticmethod
-    def from_word(word, depth, parent):
+    def from_qualified_synsets(qualified_synsets: [str], depth: int, parent):
+        '''
+        Identical to the singular lookup but performed on a list of fully
+        qualified synsets.
+        '''
+        synsets = list(map(lambda qs: wordnet.synset(qs), qualified_synsets))
+        return Node(synsets, depth, parent)
+
+    @staticmethod
+    def from_word(word: str, depth: int, parent):
         '''
         Looks up the synset based on the name alone, e.g:
         'musical instrument' -> 'musical_instrument.n.01'
@@ -42,10 +56,10 @@ class Node:
         '''
         word.replace(" ", "_")
         synset = wordnet.synsets(word)[0]
-        return Node(synset, depth, parent)
+        return Node([synset], depth, parent)
 
     def __str__(self):
-        return f"Synset: {self.synset}, Depth: {self.depth}, Count: {self.count}"
+        return f"Synset: {self.synsets}, Depth: {self.depth}, Count: {self.count}"
 
 
 # Doubly-Connected Tree Construction
@@ -54,7 +68,7 @@ root_node = Node.from_word("entity", 0, None)
 # depth 1
 animal_node = Node.from_word("animal", 1, root_node)
 instrument_node = Node.from_word("musical_instrument", 1, root_node)
-food_node = Node.from_qualified_synset("food.n.02", 1, root_node)
+food_node = Node.from_qualified_synsets(["food.n.01", "food.n.02"], 1, root_node)
 
 # depth 2
 cat_node = Node.from_word("cat", 2, animal_node)
@@ -114,8 +128,9 @@ class Curation:
         If no children nodes hold this relationship, the current node is returned.
         '''
         for child in node.children:
-            if classification.label.is_a(child.synset):
-                return self.find_closest_node(classification, child)
+            for syn in child.synsets:
+                if classification.label.is_a(syn):
+                    return self.find_closest_node(classification, child)
         return node
 
     def get_node_above_accuracy(self, accuracy_threshold: float) -> Optional[Node]:
@@ -197,7 +212,7 @@ class Hierarchy:
         curation = Curation(classifications)
         curated_group = curation.reduce_until(self.accuracy_threshold)
         if curated_group is not None:
-            print(f"{curated_group.synset.lemma_names()[0]}")
+            print(f"{curated_group.synsets[0].lemma_names()[0]}")
             self._store(curated_group)
         else:
             print("n/a - top n/3 categories:")
@@ -226,7 +241,7 @@ class Hierarchy:
         for i in range(node.depth):
             string += "  "
         count = self.query_count(node)
-        name = node.synset.lemma_names()[0]
+        name = node.synsets[0].lemma_names()[0]
         string += f"{str(name)} - count: {count}"
 
         print(string)
