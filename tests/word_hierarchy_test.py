@@ -21,6 +21,7 @@ def test_node_from_synset():
     node = Node.from_synset(syn, 0, None)
     assert node.synset == syn
 
+
 def test_terrier_groups_terrier():
     # 80% accuracy on 70% hierarchy should group in 'terrier'
     label = Label('02096294-n', 'australian terrier', '')
