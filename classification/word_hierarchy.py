@@ -22,14 +22,14 @@ class Node:
             parent.children.append(self)
 
     @staticmethod
-    def from_synset(synset, depth, parent):
+    def from_synset(synset, depth: int, parent):
         '''
         Creates a node from a synset object.
         '''
         return Node([synset], depth, parent)
 
     @staticmethod
-    def from_qualified_synset(qualified_synset, depth, parent):
+    def from_qualified_synset(qualified_synset: str, depth: int, parent):
         '''
         Looks up the synset based on a fully qualified name, e.g:
         food.n.01
@@ -39,7 +39,16 @@ class Node:
         return Node([synset], depth, parent)
 
     @staticmethod
-    def from_word(word, depth, parent):
+    def from_qualified_synsets(qualified_synsets: [str], depth: int, parent):
+        '''
+        Identical to the singular lookup but performed on a list of fully
+        qualified synsets.
+        '''
+        synsets = list(map(lambda qs: wordnet.synset(qs), qualified_synsets))
+        return Node(synsets, depth, parent)
+
+    @staticmethod
+    def from_word(word: str, depth: int, parent):
         '''
         Looks up the synset based on the name alone, e.g:
         'musical instrument' -> 'musical_instrument.n.01'
@@ -59,7 +68,7 @@ root_node = Node.from_word("entity", 0, None)
 # depth 1
 animal_node = Node.from_word("animal", 1, root_node)
 instrument_node = Node.from_word("musical_instrument", 1, root_node)
-food_node = Node.from_qualified_synset("food.n.02", 1, root_node)
+food_node = Node.from_qualified_synsets(["food.n.01", "food.n.02"], 1, root_node)
 
 # depth 2
 cat_node = Node.from_word("cat", 2, animal_node)
@@ -119,9 +128,9 @@ class Curation:
         If no children nodes hold this relationship, the current node is returned.
         '''
         for child in node.children:
-            # TODO use whole list rather than the head
-            if classification.label.is_a(child.synsets[0]):
-                return self.find_closest_node(classification, child)
+            for syn in child.synsets:
+                if classification.label.is_a(syn):
+                    return self.find_closest_node(classification, child)
         return node
 
     def get_node_above_accuracy(self, accuracy_threshold: float) -> Optional[Node]:
@@ -232,7 +241,7 @@ class Hierarchy:
         for i in range(node.depth):
             string += "  "
         count = self.query_count(node)
-        name = node.synset.lemma_names()[0]
+        name = node.synsets[0].lemma_names()[0]
         string += f"{str(name)} - count: {count}"
 
         print(string)
