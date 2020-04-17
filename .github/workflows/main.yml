@@ -18,5 +18,8 @@ jobs:
           architecture: 'x64'
       - name: Initialize Conda Environment
         uses: s-weigand/setup-conda@v1
-      - run: conda install --yes --file requirements.txt
+      - run: conda --version
+      - run: conda install -c anaconda pytest
+      - run: conda install nltk
+      - run: conda install pytorch torchvision -c pytorch
       - run: pytest -s

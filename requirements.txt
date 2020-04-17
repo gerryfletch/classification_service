@@ -1,3 +1,4 @@
--c anaconda pytest
+pytest
 nltk
-pytorch torchvision -c pytorch
+pytorch
+torchvision
