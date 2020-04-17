@@ -35,9 +35,9 @@ python3.7 main.py
 
 ## Usage
 The application is split into three modules.
-- All code related to the neural network is under `classification/net.py`
-- All code related to data sources and image manipulation is under `classification/datasource.py`
-- All code related to hierarchal grouping with the curated tree is under `classification/word_hierarchy.py`
+- Neural network creation and configuration is under `classification/net.py`
+- Data sources and image manipulation is under `classification/datasource.py`
+- Hierarchal grouping with the curated tree is under `classification/word_hierarchy.py`
 
 ### Construct a Data Source, Classify, and Store in Hierarchy
 ```python
