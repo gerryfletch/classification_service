@@ -19,7 +19,5 @@ jobs:
       - name: Initialize Conda Environment
         uses: s-weigand/setup-conda@v1
       - run: conda --version
-      - run: conda install pytest
-      - run: conda install nltk
-      - run: conda install pytorch torchvision -c pytorch
+      - run: conda install --yes --file requirements.txt
       - run: pytest -s
