@@ -1,3 +1,4 @@
 pytest
 nltk
-pytorch torchvision
+pytorch
+torchvision
