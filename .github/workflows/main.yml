@@ -18,5 +18,5 @@ jobs:
           architecture: 'x64'
       - name: Initialize Conda Environment
         uses: s-weigand/setup-conda@v1
-      - run: conda install --file requirements.txt
+      - run: conda install --yes --file requirements.txt
       - run: pytest -s
