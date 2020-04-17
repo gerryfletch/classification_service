@@ -21,7 +21,7 @@ data = [
     {'description': "toy terrier", 'ds': DataSource(
         "https://cdn.shopify.com/s/files/1/2548/4866/files/basics-of-dog-breed-english-toy-terrier_large.jpg?v=1546565029")},
 
-    # cats
+    # 3 cats
     {'description': "cat in box",
         'ds': DataSource("https://www.cats.org.uk/media/3236/choosing-a-cat.jpg")},
     {'description': "tabby cat", 'ds': DataSource(
@@ -29,7 +29,7 @@ data = [
     {'description': "tabby kitten", 'ds': DataSource(
         "https://www.natureplprints.com/p/729/rf-brown-tabby-kittenage-6-weeks-19113989.jpg")},
 
-    # misc animals
+    # 1 misc animals
     {'description': "fish", 'ds': DataSource(
         "https://api.time.com/wp-content/uploads/2019/11/fish-with-human-face-tik-tok-video.jpg")},
 

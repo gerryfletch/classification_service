@@ -241,8 +241,10 @@ class Hierarchy:
         for i in range(node.depth):
             string += "  "
         count = self.query_count(node)
+        recursive_count = self.query_recursive_count(node)
+
         name = node.synsets[0].lemma_names()[0]
-        string += f"{str(name)} - count: {count}"
+        string += f"{str(name)} - node count: {count}, recursive count: {recursive_count}"
 
         print(string)
 
