@@ -48,13 +48,11 @@ from classification.word_hierarchy import Hierarchy
 data_source = DataSource(url = "URL_TO_IMAGE")
 net = Network(accuracy_boundary=0.05, use_cuda=False) # boundary between 0-1, defaults to 0.05. use_cuda defaults to False.
 
-classifications = net.classify(data_source) # : [Classification]
 # or, net.classify_url("URL_TO_IMAGE") for shorthand
+classifications = net.classify(data_source) # : [Classification]
 
 hierarchy = Hierarchy(accuracy_threshold=0.7) # threshold between 0-1, defaults to 0.7.
-
 hierarchy.place(classifications) # : bool
-
 hierarchy.print() # visualizes results in tree
 ```
 
