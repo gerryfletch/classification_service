@@ -2,12 +2,57 @@
 This service aims to classify images using the [ImageNet](http://www.image-net.org/) database,
 which labels images based on the [WordNet](https://wordnet.princeton.edu/) noun hierarchy.
 
-Image classifications are matched to nodes in the [Curated Tree](curated-tree) if their
+Image classifications are matched to nodes in the [Curated Tree](#curated-tree) if their
 accumulated accuracy is greater than the threshold (default to 0.7). Details on this process
-are described in the [Matching Algorithm](matching-algorithm) section.
+are described in the [Matching Algorithm](#matching-algorithm) section.
 
 The in-memory curated tree can be queried for insights such as the
 total number of classifications belonging to dogs, for example.
+
+# Contents
+- [Install](#install)
+- [Usage](#usage)
+- [Curated Tree](#curated-tree)
+- [Matching Algorithm](#matching-algorithm)
+  - [Step 1: Closest-Node Grouping](#1.-closest-node-grouping)
+  - [Step 2: Reduction](#2.-reduction)
+  - [Conclusion](#Conclusion)
+
+## Install
+Requires Python 3.7+
+
+```bash
+git clone https://github.com/gerryfletch/classification_service/
+cd classification_service
+conda install --yes --channel pytorch --file requirements.txt
+
+# run tests to make sure everything is working
+pytest tests/
+
+# run the demo data + visualize results
+python3.7 main.py
+```
+
+## Usage
+The application is split into three modules.
+- All code related to the neural network is under `classification/net.py`
+- All code related to data sources and image manipulation is under `classification/datasource.py`
+- All code related to hierarchal grouping with the curated tree is under `classification/word_hierarchy.py`
+
+### Construct a Data Source, Classify, and Store in Hierarchy
+```python
+data_source = DataSource(url = "URL_TO_IMAGE")
+net = Network(accuracy_boundary=0.05, use_cuda=False) # boundary between 0-1, defaults to 0.05. use_cuda defaults to False.
+
+classifications = net.classify(data_source) # : [Classification]
+# or, net.classify_url("URL_TO_IMAGE") for shorthand
+
+hierarchy = Hierarchy(accuracy_threshold=0.7) # threshold between 0-1, defaults to 0.7.
+
+hierarchy.place(classifications) # : bool
+
+hierarchy.print() # visualizes results in tree
+```
 
 ## Curated Tree
 ```
@@ -21,6 +66,7 @@ entity
     - drum
     - piano
     - guitar
+  - food
 ```
 
 ## Matching Algorithm
@@ -135,9 +181,3 @@ with very granular results. The continuous reduction step is an alternative to
 relying on the similarity (e.g Wu-Palmer) of nouns to accumulate accuracies and 
 eventually pick a node, which only works if the universe of the neural network
 results is enclosed in the curated tree.
-
-## Usage
--
-
-## Output
--

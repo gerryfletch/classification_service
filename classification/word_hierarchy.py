@@ -204,7 +204,7 @@ class Hierarchy:
     accuracy_threshold: float
     hierarchy: Dict[Node, int]
 
-    def __init__(self, accuracy_threshold: float):
+    def __init__(self, accuracy_threshold: float = 0.7):
         self.accuracy_threshold = accuracy_threshold
         self.hierarchy = {}
 
