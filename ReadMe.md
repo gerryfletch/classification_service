@@ -41,6 +41,10 @@ The application is split into three modules.
 
 ### Construct a Data Source, Classify, and Store in Hierarchy
 ```python
+from classification.datasource import DataSource
+from classification.net import Network
+from classification.word_hierarchy import Hierarchy
+
 data_source = DataSource(url = "URL_TO_IMAGE")
 net = Network(accuracy_boundary=0.05, use_cuda=False) # boundary between 0-1, defaults to 0.05. use_cuda defaults to False.
 
